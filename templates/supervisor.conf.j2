@@ -1,14 +1,15 @@
-#!upstart
+[Unit]
+Description=Supervisor process control system for UNIX
+Documentation=http://supervisord.org
+After=network.target
 
-description "Manage supervisor"
+[Service]
+ExecStart={{ supervisor_bin }}-n -c {{ supervisor_conf_file }}
+ExecStop={{ supervisor_bindir }}/supervisorctl $OPTIONS shutdown
+ExecReload={{ supervisor_bindir }}/supervisorctl  -c {{ supervisor_conf_file }} $OPTIONS reload
+KillMode=process
+Restart=on-failure
+RestartSec=50s
 
-start on (local-filesystems and runlevel [2345])
-stop on runlevel [!2345]
-
-{% if supervisor_nofile %}
-limit nofile {{supervisor_nofile}} {{supervisor_nofile}}
-{% endif %}
-
-respawn
-
-exec {{supervisor_bin}} -c {{ supervisor_conf_file }} --nodaemon
+[Install]
+WantedBy=multi-user.target
